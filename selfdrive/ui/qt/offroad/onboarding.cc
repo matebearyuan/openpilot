@@ -7,6 +7,7 @@
 #include <QtWebEngine>
 #include <QWebEngineView>
 #include <QWebEngineSettings>
+#include <fstream>
 
 #include "common/params.h"
 #include "onboarding.hpp"
@@ -71,7 +72,6 @@ TrainingGuide::TrainingGuide(QWidget* parent) {
 
 
 QWidget* OnboardingWindow::terms_screen() {
-
   QVBoxLayout *main_layout = new QVBoxLayout;
   main_layout->setContentsMargins(40, 0, 40, 0);
   QWebEngineView *view = new QWebEngineView(this);
@@ -90,7 +90,7 @@ QWidget* OnboardingWindow::terms_screen() {
     updateActiveScreen();
   });
   QWidget* w = layout2Widget(buttons);
-  w->setFixedHeight(150);
+  w->setFixedHeight(200);
   main_layout->addWidget(w);
 
   QWidget *widget = new QWidget;
@@ -121,7 +121,16 @@ void OnboardingWindow::updateActiveScreen() {
   }
 }
 
+void enableBacklight(){
+  std::ofstream brightness_control("/sys/class/backlight/panel0-backlight/brightness");
+  if (brightness_control.is_open()) {
+    brightness_control << "1000\n";
+    brightness_control.close();
+  }
+
+}
 OnboardingWindow::OnboardingWindow(QWidget *parent) : QStackedWidget(parent) {
+  enableBacklight();
   Params params = Params();
   current_terms_version = params.get("TermsVersion", false);
   current_training_version = params.get("TrainingVersion", false);
